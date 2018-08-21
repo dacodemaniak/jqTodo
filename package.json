@@ -1,0 +1,22 @@
+{
+  "name": "mytodo",
+  "version": "1.0.0",
+  "description": "Gestionnaire de liste de tâches",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "bootstrap",
+    "jquery",
+    "javascript",
+    "localstorage"
+  ],
+  "author": "Moi",
+  "license": "ISC",
+  "dependencies": {
+    "bootstrap": "^4.1.3",
+    "jquery": "^3.3.1",
+    "popper.js": "^1.14.3"
+  }
+}
