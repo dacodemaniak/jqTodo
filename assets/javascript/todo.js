@@ -2,6 +2,9 @@
  * @name todo.js Gestionnaire de tâches
  */
 
+ // Instancie un nouvel objet de la classe TodoList
+var todoList = new TodoList();
+
  /**
   * Gestionnaire d'événement sur la zone de saisie : theTodo
   */
@@ -18,6 +21,15 @@
  */
 $('#todo').on('submit', function(event) {
     event.preventDefault(); // Interdire la soumission du formulaire
+    // Instancier un objet en Javascript
+    var todo = new Todo(todoList); // Création de l'instance de todo
+    // Méthodes implicites get et set
+    todo.todo = $('#theTodo').val(); // Méthode "set"
+    console.log('L\'objet todo contient : ' + todo.todo); // Méthode "get"
+    // Méthodes explicites
+    //todo.setTodo($('#theTodo').val());
+    //console.log('Explicitement, pareil : ' + todo.getTodo());
+    console.log(todoList._todos.length);
 
     // Désactiver le bouton d'ajout
     $('#ajouter').attr('disabled', 'disabled');
@@ -87,6 +99,13 @@ $('#todo').on('submit', function(event) {
  */
 $('tbody').on('click', '.deleteBtn, .multiSelect', function(event) {
     if ($(this).hasClass('deleteBtn')) {
+        // Récupérer la valeur du second td de la ligne
+        let todoColIndex = $(this).parents('tr').index();
+        let todo = todoList.get(todoColIndex);
+        todo.delete();
+
+        console.log('Il reste : ' + todoList._todos.length + ' éléments');
+
         $(this).parents('tr').remove();
         // Là, aussi... un petit toast
         if ($('tbody tr').length == 0) {
@@ -126,18 +145,28 @@ $('tbody').on('click', '.deleteBtn, .multiSelect', function(event) {
  */
 $('#btnMultiDelete').on('click', function(event) {
     let indice = 0;
+    let indices = [];
 
     $('tbody tr').each(function() {
+        let TRIndex = $(this).index();
+
         let firstCol = $(this).children('td').eq(0);
         let checkbox = firstCol.children('input').eq(0);
 
         if (checkbox.is(':checked')) {
             console.log('On dégage la ligne : ' + indice);
+            //indices.push(indice);
             $(this).remove();
+            let todo = todoList.get(TRIndex);
+            todo.delete();
         }
         indice++;
     });
+    console.log(todoList.toString());
 
+    //todoList.reduce(indices);
+
+    console.log('Il reste : ' + todoList._todos.length + ' éléments dans le tableau');
     // En fin de parcours, si plus aucune ligne... journée finie
     if ($('tbody tr').length == 0) {
         $.toast(
