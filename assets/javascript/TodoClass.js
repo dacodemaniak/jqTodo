@@ -33,6 +33,13 @@ class Todo {
     delete() {
         this._todoList.delete(this);
     }
+
+    /**
+     * Met à jour le todo courant dans la liste des todos
+     */
+    update(newContent) {
+        this._todoList.update(this, newContent);
+    }
     /**
      * getter explicite pour accéder à l'attribut _todo
      * @return string

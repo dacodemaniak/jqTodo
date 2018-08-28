@@ -58,6 +58,7 @@ $('#todo').on('submit', function(event) {
 
     // Création de la deuxième colonne : le texte saisi
     let contentCol = $('<td>');
+    contentCol.addClass('inplace');
     contentCol.html(content);
     // Ajouter la colonne à la ligne courante
     contentCol.appendTo(ligne);
@@ -97,7 +98,7 @@ $('#todo').on('submit', function(event) {
  * pas a priori dans le DOM, on va donc
  * utiliser la délégation d'événement
  */
-$('tbody').on('click', '.deleteBtn, .multiSelect', function(event) {
+$('tbody').on('click', '.deleteBtn, .multiSelect, .inplace', function(event) {
     if ($(this).hasClass('deleteBtn')) {
         // Récupérer la valeur du second td de la ligne
         let todoColIndex = $(this).parents('tr').index();
@@ -124,18 +125,69 @@ $('tbody').on('click', '.deleteBtn, .multiSelect', function(event) {
             );
         }
     } else {
-        // Il s'agit donc d'une boîte à cocher
-        if ($('input[type=checkbox]:checked').length > 0) {
-            $('#btnMultiDelete').removeAttr('disabled');
-        } else {
-            $('#btnMultiDelete').attr('disabled', 'disabled');
-        }
+        if ($(this).hasClass('multiSelect')) {
+            // Il s'agit donc d'une boîte à cocher
+            if ($('input[type=checkbox]:checked').length > 0) {
+                $('#btnMultiDelete').removeAttr('disabled');
+            } else {
+                $('#btnMultiDelete').attr('disabled', 'disabled');
+            }
 
-        // Petite cerise sur le gâteau
-        if ($(this).is(':checked')) {
-            $(this).parent('td').next('td').addClass('strikedOut');
+            // Petite cerise sur le gâteau
+            if ($(this).is(':checked')) {
+                $(this).parent('td').next('td').addClass('strikedOut');
+            } else {
+                $(this).parent('td').next('td').removeClass('strikedOut');
+            }
         } else {
-            $(this).parent('td').next('td').removeClass('strikedOut');
+            if ($(this).hasClass('inplace')) {
+                // Récupère le contenu de la colonne
+                let content = $(this).html();
+                $(this).html('');
+                $(this).removeClass('inplace'); // Sinon, bug
+
+                // Génère un champ de saisie
+                let input = $('<input>');
+                input.addClass('inplace-editing');
+                input.val(content);
+                input.attr('type', 'text');
+                // Remplace le contenu courant par le champ
+                input.appendTo($(this));
+            }
+        }
+    }
+});
+
+/**
+ * Gestionnaire d'événement pour la mise à jour d'un champ inplace
+ */
+$('tbody').on('keypress', 'tr td', function(event) {
+    if (event.keyCode === 13) {
+
+
+        // Touche entrée... on récupère la colonne concernée
+        let currentCol = $(this);
+        let input = currentCol.children('input').eq(0);
+        let currentContent = input.val();
+        console.log('Contenu : ' + currentContent);
+
+        // Récupère l'identifiant de la ligne
+        let TRIndex = currentCol.parent('tr').index();
+        let todo = todoList.get(TRIndex);
+
+        if (input.val().length > 5) {
+
+            todo.update(currentContent);
+
+            // On s'occupe de la colonne
+            input.remove();
+            currentCol.html(currentContent);
+            currentCol.addClass('inplace');
+        } else {
+            // Petit toast pour dire à l'utilisateur que c'est pas ok
+            input.remove();
+            currentCol.html(todo.todo);
+            currentCol.addClass('inplace');            
         }
     }
 });
@@ -162,6 +214,8 @@ $('#btnMultiDelete').on('click', function(event) {
         }
         indice++;
     });
+    console.log(todoList._todos);
+    
     console.log(todoList.toString());
 
     //todoList.reduce(indices);

@@ -1,3 +1,9 @@
 td.strikedOut {
     text-decoration: line-through;
 }
+
+input.inplace-editing {
+    background-image: url("./../images/icon_checkmark.png");
+    background-repeat: no-repeat;
+    background-position: 98% 50%;
+}

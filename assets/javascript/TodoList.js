@@ -5,6 +5,9 @@ class TodoList {
      */
     constructor() {
         this._todos = [];
+
+        // Charger les todos existants
+        this._load();
     }
 
     /**
@@ -21,9 +24,25 @@ class TodoList {
      */
     add(todo) {
         this._todos.push(todo);
+        // Appeler la méthode persistence des données
+        this._persist();
     }
 
-    update() {}
+    /**
+     * Met à jour le todo et sauvegarde l'ensemble
+     * @param {Todo} todo 
+     * @param {String} newContent 
+     */
+    update(todo, newContent) {
+        let index = this._todos.indexOf(todo);
+
+        if (index !== 1) {
+            todo.setTodo(newContent);
+            this._todos[index] = todo;
+
+            this._persist();
+        }
+    }
 
     /**
      * Supprime un todo de la liste
@@ -34,6 +53,8 @@ class TodoList {
         if (index !== -1) {
             this._todos.splice(index, 1);
         }
+        // Appeler la méthode persistence des données
+        this._persist();
     }
 
     /**
@@ -53,9 +74,100 @@ class TodoList {
         this._todos = newArray;
     }
 
-    _persist() {}
+    /**
+     * Fait persister les données dans localStorage
+     */
+    _persist() {
+        let datas = [];
+        
+        for(let index = 0; index < this._todos.length; index++) {
+            datas.push(this._todos[index]._todo);
+        }
 
-    _load(){}
+        localStorage.setItem('todos', JSON.stringify(datas));
+    }
+
+    /**
+     * Charge la liste des todos du localStorage
+     */
+    _load(){
+        let todos = localStorage.getItem('todos');
+
+        if (todos) {
+            let jsonTodos = JSON.parse(todos);
+
+            for(let index=0; index < jsonTodos.length; index++) {
+                let todo = new Todo(this);
+                todo._todo = jsonTodos[index];
+                // Et on ajoute à la liste
+                this._todos.push(todo);
+            }
+            console.log('Mes todos : ' + this.toString());
+
+            // Envoyer les todos dans le tableau HTML
+            this._render();
+        }
+    }
+
+    _render() {
+        for (let index = 0; index < this._todos.length; index++) {
+            let content = this._todos[index]._todo;
+
+            // Et c'est parti pour la reconstruction des lignes
+            // Création de la ligne dans le tableau HTML
+            let ligne = $('<tr>');
+
+            // Création de la première colonne : boîte à cocher
+            let checkboxCol = $('<td>');
+            
+            // Création d'une boîte à cocher
+            let checkbox = $('<input>');
+            checkbox.attr('type', 'checkbox')
+                .attr('checked', false)
+                .addClass('multiSelect');
+            
+            // Ajoute la boîte à cocher à la colonne
+            checkbox.appendTo(checkboxCol);
+
+            // Ajouter la colonne à la ligne en mémoire
+            checkboxCol.appendTo(ligne);
+
+            // Création de la deuxième colonne : le texte saisi
+            let contentCol = $('<td>');
+            contentCol.addClass('inplace');
+            contentCol.html(content);
+            // Ajouter la colonne à la ligne courante
+            contentCol.appendTo(ligne);
+
+            // Création de la troisième colonne : le bouton de suppression
+            let deleteCol = $('<td>');
+
+            // Création du bouton de sélection
+            let deleteButton = $('<button>');
+            deleteButton
+                .addClass('deleteBtn')
+                .addClass('btn')
+                .addClass('btn-outline-danger')
+                .attr('type', 'button');
+
+            // Création de l'icône de suppression
+            let deleteIcon = $('<span>');
+            deleteIcon
+                .addClass('icon-bin2');
+
+            // Ajoute l'icône au bouton
+            deleteIcon.appendTo(deleteButton);
+
+            // Ajoute le bouton à la colonne
+            deleteButton.appendTo(deleteCol);
+
+            // Ajoute la colonne à la ligne
+            deleteCol.appendTo(ligne);
+
+            // Ajoute la ligne complète à l'élément tbody
+            ligne.appendTo($('tbody'));            
+        }
+    }
 
     toString() {
         let message = '';
