@@ -32,7 +32,10 @@ class TodoList {
             data: {title: todo._todo},
             success: function(datas) {
                 let data = datas[0]; // Récupère la ligne de la base
-                _instance._todos.push(data);
+                let todo = new Todo(_instance);
+                todo._id = data.id;
+                todo._todo = data.title;
+                _instance._todos.push(todo);
             },
             error: function(error) {
                 console.log('Erreur levée : ' + JSON.stringify(error));
