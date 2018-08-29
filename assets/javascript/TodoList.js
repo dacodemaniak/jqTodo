@@ -23,9 +23,21 @@ class TodoList {
      * @param {Todo} todo Objet todo qui sera passé en paramètre
      */
     add(todo) {
-        this._todos.push(todo);
-        // Appeler la méthode persistence des données
-        this._persist();
+        let _instance = this;
+
+        $.ajax({
+            url: 'http://127.0.0.1:3000/Todos',
+            method: 'post',
+            dataType: 'json',
+            data: {title: todo._todo},
+            success: function(datas) {
+                let data = datas[0]; // Récupère la ligne de la base
+                _instance._todos.push(data);
+            },
+            error: function(error) {
+                console.log('Erreur levée : ' + JSON.stringify(error));
+            }
+        });
     }
 
     /**
@@ -34,13 +46,12 @@ class TodoList {
      * @param {String} newContent 
      */
     update(todo, newContent) {
+        console.log('Mise à jour du Todo dans le tableau : ' + todo.id);
         let index = this._todos.indexOf(todo);
 
         if (index !== 1) {
             todo.setTodo(newContent);
             this._todos[index] = todo;
-
-            this._persist();
         }
     }
 
@@ -88,25 +99,34 @@ class TodoList {
     }
 
     /**
-     * Charge la liste des todos du localStorage
+     * Récupère la liste des todos à partir de l'API REST
+     *  GET http://127.0.0.1:3000/Todos
      */
     _load(){
-        let todos = localStorage.getItem('todos');
+        // Méthode $.ajax de jQuery
+        let _instance = this; // Pour passer l'objet courant dans la méthode success
 
-        if (todos) {
-            let jsonTodos = JSON.parse(todos);
-
-            for(let index=0; index < jsonTodos.length; index++) {
-                let todo = new Todo(this);
-                todo._todo = jsonTodos[index];
-                // Et on ajoute à la liste
-                this._todos.push(todo);
+        $.ajax({
+            url: 'http://127.0.0.1:3000/Todos',
+            method: 'get',
+            dataType: 'json',
+            success: function(datas) {
+                // Okay, tu m'as retourné les données de la base
+                for (let data of datas) { // Boucle sur toutes les lignes retournées
+                    let todo = new Todo(_instance);
+                    todo._id = data.id;
+                    todo._todo = data.title;
+                    _instance._todos.push(
+                        todo
+                    );
+                }
+                // On affiche le résultat...
+                _instance._render();
+            },
+            error: function(error) {
+                console.log('L\'appel ajax a échoué ' + error);
             }
-            console.log('Mes todos : ' + this.toString());
-
-            // Envoyer les todos dans le tableau HTML
-            this._render();
-        }
+        });
     }
 
     _render() {

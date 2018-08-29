@@ -153,6 +153,9 @@ $('tbody').on('click', '.deleteBtn, .multiSelect, .inplace', function(event) {
                 input.attr('type', 'text');
                 // Remplace le contenu courant par le champ
                 input.appendTo($(this));
+
+                // Désactive les autres zones
+                $('tbody tr td:nth-child(2)').removeClass('inplace');
             }
         }
     }
@@ -169,11 +172,11 @@ $('tbody').on('keypress', 'tr td', function(event) {
         let currentCol = $(this);
         let input = currentCol.children('input').eq(0);
         let currentContent = input.val();
-        console.log('Contenu : ' + currentContent);
 
         // Récupère l'identifiant de la ligne
         let TRIndex = currentCol.parent('tr').index();
         let todo = todoList.get(TRIndex);
+        console.log('Hola : ' + todo.todo + '(' + todo.id + ')');
 
         if (input.val().length > 5) {
 
@@ -189,6 +192,8 @@ $('tbody').on('keypress', 'tr td', function(event) {
             currentCol.html(todo.todo);
             currentCol.addClass('inplace');            
         }
+        // Restaure l'état de modification sur les colonnes de contenu
+        $('tbody tr td:nth-child(2)').addClass('inplace');
     }
 });
 
