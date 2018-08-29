@@ -7,3 +7,9 @@ input.inplace-editing {
     background-repeat: no-repeat;
     background-position: 98% 50%;
 }
+
+input.inplace-editing.wrong {
+    background-image: url("./../images/icon_crossmark.png");
+    background-repeat: no-repeat;
+    background-position: 98% 50%;   
+}
